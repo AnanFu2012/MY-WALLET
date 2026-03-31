@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,"PingFang SC";
+background:#f4f6f8;
+}
+
+/* 顶部 */
+.top{
+display:flex;
+justify-content:space-between;
+padding:15px;
+}
+.menuBtn,.avatar{
+width:38px;height:38px;border-radius:50%;
+background:#fff;
+display:flex;align-items:center;justify-content:center;
+}
+
+/* 标题 */
+.walletTitle{text-align:center;color:#888;font-size:14px;}
+
+/* 余额 */
+.balance{
+text-align:center;
+font-size:28px;
+font-weight:bold;
+border:2px solid #e5e7eb;
+border-radius:12px;
+padding:10px;
+margin:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* 操作 */
+.actions{display:flex;justify-content:space-around;margin:20px;}
+.circle{
+width:60px;height:60px;border-radius:20px;
+background:#e6f7ec;color:#16a34a;
+display:flex;align-items:center;justify-content:center;
+}
+
+/* 卡片 */
+.cards{
+display:flex;
+overflow-x:auto;
+overflow-y:hidden;
+padding-left:15px;
+padding-right:30px;
+gap:15px;
+}
+.card{
+min-width:280px;height:170px;border-radius:20px;
+padding:20px;color:white;position:relative;
+}
+.card::before{
+content:"";
+position:absolute;width:200%;height:200%;
+background:linear-gradient(120deg,transparent,rgba(255,255,255,0.2),transparent);
+transform:rotate(25deg);
+}
+.card1{background:linear-gradient(135deg,#4f46e5,#9333ea);}
+.card2{background:linear-gradient(135deg,#111,#444);}
+.card3{background:linear-gradient(135deg,#1e3a8a,#3b82f6);}
+.card4{background:linear-gradient(135deg,#6b21a8,#c026d3);}
+.card5{background:linear-gradient(135deg,#0f172a,#1e293b);}
+
+/* 卡信息 */
+.card .bank{position:absolute;top:10px;left:15px;font-size:12px;}
+.card .label{position:absolute;top:25px;left:15px;font-size:10px;}
+.card .exp{position:absolute;top:10px;right:15px;font-size:12px;}
+.card .num{position:absolute;bottom:50px;font-weight:bold;}
+.card .name{position:absolute;bottom:20px;}
+
+/* 广告 */
+.ad{
+background:#e6f7ec;
+margin:10px 15px;
+padding:15px;
+border-radius:15px;
+display:flex;
+justify-content:space-between;
+}
+
+/* 交易记录 */
+.item{
+background:#fff;
+margin:10px 15px;
+padding:15px;
+border-radius:18px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
+border:1px solid #eee;
+}
+.left{display:flex;flex-direction:column;}
+.left small{color:#888;font-size:12px;}
+.status{
+background:#dcfce7;
+color:#16a34a;
+padding:5px 12px;
+border-radius:12px;
+font-size:12px;
+}
+.amount{font-size:16px;font-weight:600;}
+
+/* 侧边栏 */
+.sidebar{
+position:fixed;
+top:0;left:0;
+width:260px;height:100%;
+background:#fff;
+transform:translateX(-100%);
+transition:0.3s;
+padding:15px;
+z-index:10;
+}
+.sidebar.show{transform:translateX(0);}
+.menuItem{
+background:#f3f4f6;
+padding:12px;
+border-radius:12px;
+margin:10px 0;
+}
+
+/* 遮罩 */
+.overlay{
+position:fixed;
+width:100%;height:100%;
+background:rgba(0,0,0,0.4);
+display:none;
+}
+
+/* 转账 */
+.popup{
+position:fixed;
+bottom:-400px;
+width:100%;
+left:0;right:0;
+max-width:100vw;
+background:#fff;
+padding:20px;
+border-radius:20px 20px 0 0;
+transition:0.3s;
+overflow:hidden;
+}
+.popup.show{bottom:0;}
+
+input{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:10px;
+border:1px solid #ddd;
+}
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:12px;
+background:#3b82f6;
+color:white;
+border:none;
+}
+
+/* loading */
+.loading{
+position:fixed;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+background:#fff;
+padding:20px 40px;
+border-radius:15px;
+box-shadow:0 5px 20px rgba(0,0,0,0.2);
+display:none;
+z-index:9999;
+}
+
+/* 资产分析页面 */
+#chartPage{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:#f4f6f8;
+display:none;
+overflow:auto;
+z-index:999;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="overlay" class="overlay" onclick="closeAll()"></div>
+<div class="loading" id="loading">Loading...</div>
+
+<!-- 侧边栏 -->
+<div id="sidebar" class="sidebar">
+<div class="menuItem" onclick="openChart()">资产分析</div>
+<div class="menuItem" onclick="openTransfer()">转账</div>
+<div class="menuItem" onclick="showLoading()">活动</div>
+<div class="menuItem" onclick="showLoading()">客服</div>
+</div>
+
+<!-- 主界面 -->
+<div id="main">
+
+<div class="top">
+<div class="menuBtn" onclick="toggleMenu()">☰</div>
+<div class="avatar"></div>
+</div>
+
+<div class="walletTitle">主钱包 1 📋</div>
+
+<div class="balance">
+<div style="font-size:14px;color:#888;">Total Balance</div>
+$1,849,999,999,998,150
+</div>
+
+<div class="actions">
+<div onclick="openTransfer()"><div class="circle">↗</div>Send</div>
+<div onclick="showLoading()"><div class="circle">+</div>Add</div>
+<div onclick="showLoading()"><div class="circle">⇄</div>Swap</div>
+</div>
+
+<div class="cards">
+<div class="card card1">
+<div class="bank">BANK</div>
+<div class="label">VALID THRU</div>
+<div class="exp">12/28</div>
+<div class="num">**** 7171</div>
+<div class="name">ANAN</div>
+</div>
+<div class="card card2">
+<div class="bank">PREMIUM</div>
+<div class="label">VALID THRU</div>
+<div class="exp">09/27</div>
+<div class="num">**** 8888</div>
+<div class="name">VIP</div>
+</div>
+<div class="card card3">
+<div class="bank">CREDIT</div>
+<div class="label">VALID THRU</div>
+<div class="exp">03/29</div>
+<div class="num">**** 9999</div>
+<div class="name">CLIENT</div>
+</div>
+<div class="card card4">
+<div class="bank">ELITE</div>
+<div class="label">VALID THRU</div>
+<div class="exp">11/26</div>
+<div class="num">**** 1234</div>
+</div>
+<div class="card card5">
+<div class="bank">DIGITAL</div>
+<div class="label">VALID THRU</div>
+<div class="exp">01/30</div>
+<div class="num">**** 5678</div>
+</div>
+</div>
+
+<div class="ad">
+<div><b>Earn Rewards</b><br><small>Daily return</small></div>
+<div onclick="this.parentNode.style.display='none'">✕</div>
+</div>
+
+<div id="list"></div>
+
+</div>
+
+<!-- 转账 -->
+<div class="popup" id="popup">
+<div onclick="closeAll()" style="margin-bottom:10px;color:#3b82f6;">← 返回</div>
+<input id="user" placeholder="用户名">
+<input id="money" placeholder="金额">
+<button onclick="send()">转账</button>
+<div id="msg"></div>
+</div>
+
+<!-- 资产分析页面 -->
+<div id="chartPage">
+<div style="padding:15px;font-weight:bold;" onclick="closeChart()">← 返回</div>
+<div id="chartsContainer"></div>
+</div>
+
+<script>
+
+function toggleMenu(){
+sidebar.classList.toggle("show");
+overlay.style.display="block";
+}
+function closeAll(){
+sidebar.classList.remove("show");
+overlay.style.display="none";
+popup.classList.remove("show");
+}
+
+/* loading */
+function showLoading(){
+loading.style.display="block";
+setTimeout(()=>loading.style.display="none",1500);
+}
+
+/* 转账 */
+function openTransfer(){
+popup.classList.add("show");
+}
+function send(){
+if(!user.value||!money.value){
+msg.innerText="信息不完整";
+return;
+}
+msg.innerText="Loading...";
+setTimeout(()=>{
+msg.innerText="成功";
+setTimeout(()=>popup.classList.remove("show"),1000);
+},1500);
+}
+
+/* 图表页面 */
+function openChart(){
+closeAll();
+chartPage.style.display="block";
+chartsContainer.innerHTML="";
+
+for(let i=0;i<4;i++){
+let c=document.createElement("canvas");
+c.style.width="90%";
+c.style.height="200px";
+c.style.background="#fff";
+c.style.margin="15px auto";
+c.style.display="block";
+c.style.borderRadius="15px";
+
+chartsContainer.appendChild(c);
+
+let ctx=c.getContext("2d");
+c.width=window.innerWidth;
+
+/* 网格 */
+ctx.strokeStyle="#eee";
+for(let j=0;j<6;j++){
+ctx.beginPath();
+ctx.moveTo(0,j*40);
+ctx.lineTo(c.width,j*40);
+ctx.stroke();
+ctx.fillText(100-j*20,5,j*40);
+}
+
+/* 绿线 */
+ctx.beginPath();
+let x=0,y=120;
+for(let j=0;j<40;j++){
+y+=Math.random()>0.5?5:-5;
+ctx.lineTo(x,y);
+x+=10;
+}
+ctx.strokeStyle="#16a34a";
+ctx.stroke();
+
+/* 红线 */
+ctx.beginPath();
+x=0;y=140;
+for(let j=0;j<40;j++){
+y+=Math.random()>0.5?4:-4;
+ctx.lineTo(x,y);
+x+=10;
+}
+ctx.strokeStyle="#ef4444";
+ctx.stroke();
+
+/* X轴 */
+for(let j=0;j<12;j++){
+ctx.fillText(j+1,j*30,200);
+}
+
+ctx.fillText(["AAPL","TSLA","NVDA","DOW"][i],50,20);
+}
+}
+
+function closeChart(){
+chartPage.style.display="none";
+}
+
+/* 记录 */
+const names=["Discord","Transfer","Income","Netflix","Spotify","Amazon","Salary","Game","Steam","Gift","Food","Taxi"];
+names.forEach(n=>{
+let div=document.createElement("div");
+div.className="item";
+div.innerHTML=`
+<div class="left">
+<b>${n}</b>
+<small>Sent · 2026</small>
+</div>
+<div class="status">Completed</div>
+<div class="amount">$${Math.floor(Math.random()*500)}</div>`;
+list.appendChild(div);
+});
+
+</script>
+
+</body>
+</html>
