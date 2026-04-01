@@ -8,8 +8,8 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC";backgro
 button,.circle,.menuItem,.item,.card,.token-item{transition:0.15s;cursor:pointer;}
 button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-item:active{transform:scale(0.95);opacity:0.85;}
 
-/* 登录页面样式 */
-#login-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:20000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;box-sizing:border-box;}
+/* 登录页面样式 - 默认设为 none (不再烦人) */
+#login-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:20000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;box-sizing:border-box;}
 .login-logo{font-size:48px;margin-bottom:10px;}
 .login-box{width:100%;text-align:center;}
 
@@ -28,7 +28,7 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 .actions{display:flex;justify-content:space-around;margin:20px;}
 .circle{width:60px;height:60px;border-radius:20px;background:#e6f7ec;color:#16a34a;display:flex;align-items:center;justify-content:center;margin-bottom:5px;}
 
-/* 银行卡 */
+/* 银行卡细节 */
 .cards{display:flex;overflow-x:auto;padding-left:15px;padding-right:30px;gap:15px;scrollbar-width:none;}
 .cards::-webkit-scrollbar{display:none;}
 .card{min-width:280px;height:170px;border-radius:20px;padding:20px;color:white;position:relative;overflow:hidden;box-shadow:0 10px 20px rgba(0,0,0,0.1);}
@@ -42,12 +42,12 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 .card .num{position:absolute;bottom:50px;font-weight:bold;font-size:18px;letter-spacing:2px;}
 .card .name{position:absolute;bottom:20px;font-size:12px;}
 
-/* 列表 */
+/* 列表条目 */
 .item,.token-item,.market-item{background:#fff;margin:10px 15px;padding:15px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;border:1px solid #eee;box-shadow:0 3px 10px rgba(0,0,0,0.05);}
 .left{display:flex;flex-direction:column;}
 .tag{font-size:11px;padding:2px 6px;border-radius:6px;width:fit-content;margin-top:4px;}
 
-/* 菜单 */
+/* 侧边菜单 */
 #menu{position:fixed;top:0;left:-310px;width:260px;height:100%;background:#fff;box-shadow:5px 0 20px rgba(0,0,0,0.1);transition:0.3s;z-index:9998;padding:20px;}
 #menuOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:none;z-index:9997;}
 .menuItem{background:#f3f4f6;padding:14px;border-radius:12px;margin:10px 0;display:flex;align-items:center;gap:10px;}
@@ -70,18 +70,20 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12px;border:1px solid #eee;background:#f8fafc;box-sizing:border-box;}
 .modal-box button, .login-box button{width:100%;background:#16a34a;color:#fff;border:none;border-radius:15px;padding:15px;font-weight:600;}
 
-/* 资产分析 */
+/* 资产分析专有 */
 .bar-row{margin-bottom:12px;}
 .bar-bg{background:#f0f0f0;border-radius:6px;height:8px;overflow:hidden;}
 .bar-fill{height:8px;border-radius:6px;background:#16a34a;}
 .stat-card{background:#f8fdf8;border-radius:14px;padding:12px;border:1px solid #e6f7ec;}
 
-/* 标记 */
+/* 收支标记 */
 .tx-in{color:#16a34a !important; font-weight:bold;}
 .tx-out{color:#ef4444 !important; font-weight:bold;}
 .tag-in{background:#dcfce7; color:#16a34a;}
 .tag-out{background:#fee2e2; color:#ef4444;}
 .m-up{color:#16a34a;} .m-down{color:#ef4444;}
+
+/* 设置组 */
 .set-group{background:#f8fafc; border-radius:15px; padding:5px 15px; margin-bottom:15px;}
 .set-row{display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #eee;}
 </style>
@@ -94,7 +96,7 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
     <div class="login-box">
         <input type="text" placeholder="账号" id="login-user">
         <input type="password" placeholder="密码" id="login-pass">
-        <button onclick="handleLogin()">立即登录</button>
+        <button onclick="handleLogin()">登录进入</button>
     </div>
 </div>
 
@@ -206,17 +208,19 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
 </div>
 
 <script>
+// 登录/退出
 function handleLogin() {
     const u = document.getElementById('login-user').value;
     const p = document.getElementById('login-pass').value;
     if(u === 'admin' && p === '123456') {
         document.getElementById('login-page').style.display = 'none';
-        showToast("登录成功");
+        showToast("欢迎回来");
     } else {
         showToast("账号密码错误");
     }
 }
 function logout() {
+    // 唤起登录页
     document.getElementById('login-page').style.display = 'flex';
     document.getElementById('login-user').value = '';
     document.getElementById('login-pass').value = '';
@@ -249,7 +253,7 @@ function doAction(t){
     for(let i of inputs){ 
         if(!i.value.trim()){ 
             showToast("请填写完整信息"); 
-            return; // 修复：拦截，不执行后续逻辑
+            return; 
         } 
     }
     showToast("操作成功"); 
