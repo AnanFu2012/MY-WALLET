@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC";background:#f4f6f8;max-width:430px;margin:0 auto;overflow-x:hidden;}
+button,.circle,.menuItem,.item,.card,.token-item{transition:0.15s;cursor:pointer;}
+button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-item:active{transform:scale(0.95);opacity:0.85;}
+
+/* 登录页面样式 - 默认设为 none (不再烦人) */
+#login-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:20000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;box-sizing:border-box;}
+.login-logo{font-size:48px;margin-bottom:10px;}
+.login-box{width:100%;text-align:center;}
+
+/* Toast */
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:12px 24px;border-radius:12px;display:none;z-index:10000;}
+
+/* 顶部 */
+.top{display:flex;justify-content:space-between;padding:15px;align-items:center;}
+.menuBtn{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
+.avatar{width:38px;height:38px;border-radius:50%;background:url('https://api.dicebear.com/7.x/bottts/svg?seed=Tesla') #fff;background-size:cover;border:1px solid #ddd;}
+
+/* 余额 */
+.balance{text-align:center;font-size:28px;font-weight:bold;border:2px solid #e5e7eb;border-radius:12px;padding:10px;margin:10px;box-shadow:0 4px 10px rgba(0,0,0,0.05);background:#fff;}
+
+/* 操作 */
+.actions{display:flex;justify-content:space-around;margin:20px;}
+.circle{width:60px;height:60px;border-radius:20px;background:#e6f7ec;color:#16a34a;display:flex;align-items:center;justify-content:center;margin-bottom:5px;}
+
+/* 银行卡细节 */
+.cards{display:flex;overflow-x:auto;padding-left:15px;padding-right:30px;gap:15px;scrollbar-width:none;}
+.cards::-webkit-scrollbar{display:none;}
+.card{min-width:280px;height:170px;border-radius:20px;padding:20px;color:white;position:relative;overflow:hidden;box-shadow:0 10px 20px rgba(0,0,0,0.1);}
+.chip{width:35px;height:25px;background:linear-gradient(135deg,#ffd700,#b8860b);border-radius:4px;margin-bottom:10px;}
+.co-tag{position:absolute;top:20px;right:20px;font-weight:bold;font-style:italic;font-size:16px;opacity:0.8;}
+.card1{background:linear-gradient(135deg,#4f46e5,#9333ea);}
+.card2{background:linear-gradient(135deg,#111,#444);}
+.card3{background:linear-gradient(135deg,#1e3a8a,#3b82f6);}
+.card4{background:linear-gradient(135deg,#6b21a8,#c026d3);}
+.card5{background:linear-gradient(135deg,#0f172a,#1e293b);}
+.card .num{position:absolute;bottom:50px;font-weight:bold;font-size:18px;letter-spacing:2px;}
+.card .name{position:absolute;bottom:20px;font-size:12px;}
+
+/* 列表条目 */
+.item,.token-item,.market-item{background:#fff;margin:10px 15px;padding:15px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;border:1px solid #eee;box-shadow:0 3px 10px rgba(0,0,0,0.05);}
+.left{display:flex;flex-direction:column;}
+.tag{font-size:11px;padding:2px 6px;border-radius:6px;width:fit-content;margin-top:4px;}
+
+/* 侧边菜单 */
+#menu{position:fixed;top:0;left:-310px;width:260px;height:100%;background:#fff;box-shadow:5px 0 20px rgba(0,0,0,0.1);transition:0.3s;z-index:9998;padding:20px;}
+#menuOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:none;z-index:9997;}
+.menuItem{background:#f3f4f6;padding:14px;border-radius:12px;margin:10px 0;display:flex;align-items:center;gap:10px;}
+
+/* Tabs */
+.tabs-row{display:flex;padding:0 15px;background:#fff;border-bottom:1px solid #eee;margin-top:10px;position:sticky;top:0;z-index:10;}
+.tab-item{padding:14px 12px;font-size:14px;color:#999;position:relative;}
+.tab-item.active{color:#16a34a;font-weight:600;}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:10px;right:10px;height:3px;background:#16a34a;border-radius:2px;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* Modal */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:9999;justify-content:center;align-items:flex-end;}
+.modal.show{display:flex;}
+.modal-box{background:#fff;width:100%;max-width:430px;border-radius:25px 25px 0 0;padding:20px;animation:slideUp 0.3s cubic-bezier(0,0,0.2,1);box-sizing:border-box;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-size:18px;font-weight:bold;margin-bottom:15px;}
+.modal-back{color:#3b82f6;cursor:pointer;margin-bottom:10px;display:inline-block;}
+input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12px;border:1px solid #eee;background:#f8fafc;box-sizing:border-box;}
+.modal-box button, .login-box button{width:100%;background:#16a34a;color:#fff;border:none;border-radius:15px;padding:15px;font-weight:600;}
+
+/* 资产分析专有 */
+.bar-row{margin-bottom:12px;}
+.bar-bg{background:#f0f0f0;border-radius:6px;height:8px;overflow:hidden;}
+.bar-fill{height:8px;border-radius:6px;background:#16a34a;}
+.stat-card{background:#f8fdf8;border-radius:14px;padding:12px;border:1px solid #e6f7ec;}
+
+/* 收支标记 */
+.tx-in{color:#16a34a !important; font-weight:bold;}
+.tx-out{color:#ef4444 !important; font-weight:bold;}
+.tag-in{background:#dcfce7; color:#16a34a;}
+.tag-out{background:#fee2e2; color:#ef4444;}
+.m-up{color:#16a34a;} .m-down{color:#ef4444;}
+
+/* 设置组 */
+.set-group{background:#f8fafc; border-radius:15px; padding:5px 15px; margin-bottom:15px;}
+.set-row{display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #eee;}
+</style>
+</head>
+<body>
+
+<div id="login-page">
+    <div class="login-logo">🪙</div>
+    <h2 style="margin-bottom:30px;">Wallet Pro</h2>
+    <div class="login-box">
+        <input type="text" placeholder="账号" id="login-user">
+        <input type="password" placeholder="密码" id="login-pass">
+        <button onclick="handleLogin()">登录进入</button>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div id="menu">
+    <div style="font-size:20px;font-weight:bold;margin-bottom:20px;">Wallet Pro</div>
+    <div class="menuItem" onclick="openModal('analysis');closeMenu()">📊 资产分析</div>
+    <div class="menuItem" onclick="openModal('market');closeMenu()">📈 市场行情</div>
+    <div class="menuItem" onclick="openModal('send');closeMenu()">↗ 转账</div>
+    <div class="menuItem" onclick="showToast('活动中心');closeMenu()">🎉 活动</div>
+    <div class="menuItem" onclick="showToast('联系客服');closeMenu()">💬 客服</div>
+    <div class="menuItem" onclick="openModal('settings');closeMenu()" style="border-top:1px solid #eee;margin-top:10px;padding-top:20px;color:#16a34a; font-weight:bold;">⚙️ 设置中心</div>
+</div>
+<div id="menuOverlay" onclick="closeMenu()"></div>
+
+<div class="top">
+    <div class="menuBtn" onclick="openMenu()">☰</div>
+    <div class="avatar"></div>
+</div>
+
+<div class="balance">
+    <div style="font-size:14px;color:#888;">Total Balance</div>
+    $1,849,999,999,998,150
+</div>
+
+<div onclick="copyAddr()" style="text-align:center;font-size:12px;color:#666;cursor:pointer;margin-bottom:15px;">📋 0x7a3F...8B2e...d91C4f5E6A</div>
+
+<div class="actions">
+    <div onclick="openModal('send')" style="text-align:center;"><div class="circle">↗</div>Send</div>
+    <div onclick="openModal('receive')" style="text-align:center;"><div class="circle">+</div>Add</div>
+    <div onclick="openModal('swap')" style="text-align:center;"><div class="circle">⇄</div>Swap</div>
+    <div onclick="showToast('扫码功能')"><div class="circle">📷</div>Scan</div>
+</div>
+
+<div class="cards">
+    <div class="card card1"><div class="chip"></div><div class="co-tag">Apple</div><div class="num">**** 7171</div><div class="name">ANAN · PLATINUM</div></div>
+    <div class="card card2"><div class="chip"></div><div class="co-tag">Tesla</div><div class="num">**** 8888</div><div class="name">VIP · ELITE</div></div>
+    <div class="card card3"><div class="chip"></div><div class="co-tag">Google</div><div class="num">**** 9999</div><div class="name">G-CLOUD MEMBER</div></div>
+    <div class="card card4"><div class="chip"></div><div class="co-tag">SpaceX</div><div class="num">**** 1234</div><div class="name">MARS COLONY</div></div>
+    <div class="card card5"><div class="chip"></div><div class="co-tag">Meta</div><div class="num">**** 5678</div><div class="name">HORIZON USER</div></div>
+</div>
+
+<div class="tabs-row">
+    <div class="tab-item" onclick="switchTab(this,'coins')">币种</div>
+    <div class="tab-item active" onclick="switchTab(this,'tx')">交易</div>
+    <div class="tab-item" onclick="switchTab(this,'nft')">NFT</div>
+    <div class="tab-item" onclick="switchTab(this,'fav')">自选</div>
+</div>
+
+<div class="tab-content" id="tab-coins"><div id="token-list"></div></div>
+<div class="tab-content active" id="tab-tx"><div id="list"></div></div>
+<div class="tab-content" id="tab-nft" style="padding:50px;text-align:center;color:#999;">🖼️<br>暂无 NFT 资产</div>
+
+<div class="modal" id="modal-send" onclick="closeModalOutside(event,'modal-send')">
+    <div class="modal-box"><span class="modal-back" onclick="closeModal('modal-send')">← 返回</span><div class="modal-title">发送资产</div><input placeholder="地址 0x..."><input placeholder="数量" type="number"><button onclick="doAction('send')">确认发送</button></div>
+</div>
+
+<div class="modal" id="modal-receive" onclick="closeModalOutside(event,'modal-receive')">
+    <div class="modal-box"><span class="modal-back" onclick="closeModal('modal-receive')">← 返回</span><div class="modal-title">我的收款地址</div><div style="background:#f4f6f8;padding:20px;border-radius:15px;text-align:center;word-break:break-all;font-size:12px;">0x7a3F8B2eD91C4f5E6A7B8C9D</div><button style="margin-top:15px;" onclick="showToast('已复制');closeModal('modal-receive')">点击复制</button></div>
+</div>
+
+<div class="modal" id="modal-swap" onclick="closeModalOutside(event,'modal-swap')">
+    <div class="modal-box"><span class="modal-back" onclick="closeModal('modal-swap')">← 返回</span><div class="modal-title">闪兑 (Swap)</div><input placeholder="卖出: 例如 ETH"><div style="text-align:center;color:#16a34a;">⇄</div><input placeholder="买入: 例如 USDT"><button onclick="doAction('swap')">立即兑换</button></div>
+</div>
+
+<div class="modal" id="modal-analysis" onclick="closeModalOutside(event,'modal-analysis')">
+    <div class="modal-box" style="max-height:85vh;overflow-y:auto;">
+        <span class="modal-back" onclick="closeModal('modal-analysis')">← 返回</span>
+        <div class="modal-title">📊 资产分析</div>
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;">
+            <svg width="100" height="100" viewBox="0 0 110 110"><circle cx="55" cy="55" r="40" fill="none" stroke="#627eea" stroke-width="15" stroke-dasharray="180 71"/><circle cx="55" cy="55" r="31" fill="#fff"/><text x="55" y="60" text-anchor="middle" font-size="8" font-weight="bold">$1.85T</text></svg>
+            <div style="font-size:12px;"><div><span style="color:#627eea">●</span> ETH: 71%</div><div style="margin-top:5px;"><span style="color:#f3ba2f">●</span> Others: 29%</div></div>
+        </div>
+        <div id="bars"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
+            <div class="stat-card"><div style="font-size:11px;color:#888;">今日盈亏</div><div style="color:#16a34a;font-weight:bold;">+$102.9B</div></div>
+            <div class="stat-card"><div style="font-size:11px;color:#888;">收益率</div><div style="color:#16a34a;font-weight:bold;">+5.21%</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal-market" onclick="closeModalOutside(event,'modal-market')">
+    <div class="modal-box">
+        <span class="modal-back" onclick="closeModal('modal-market')">← 返回</span>
+        <div class="modal-title">📈 市场行情</div>
+        <div class="market-item"><div><b>TSLA</b><br><small>Tesla Inc.</small></div><div style="text-align:right;">$175.22<br><span class="m-up">+2.41%</span></div></div>
+        <div class="market-item"><div><b>NVDA</b><br><small>Nvidia Corp.</small></div><div style="text-align:right;">$875.30<br><span class="m-up">+5.12%</span></div></div>
+        <div class="market-item"><div><b>AAPL</b><br><small>Apple Inc.</small></div><div style="text-align:right;">$169.10<br><span class="m-down">-0.45%</span></div></div>
+        <div class="market-item"><div><b>AMZN</b><br><small>Amazon.com</small></div><div style="text-align:right;">$178.15<br><span class="m-up">+1.08%</span></div></div>
+    </div>
+</div>
+
+<div class="modal" id="modal-settings" onclick="closeModalOutside(event,'modal-settings')">
+    <div class="modal-box">
+        <span class="modal-back" onclick="closeModal('modal-settings')">← 关闭</span>
+        <div class="modal-title">⚙️ 设置中心</div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; background:#f3f4f6; padding:15px; border-radius:15px;">
+            <div class="avatar" style="width:45px; height:45px;"></div>
+            <div><div style="font-weight:bold;">Anan_Web3</div><div style="font-size:11px; color:#888;">UID: 887219304</div></div>
+        </div>
+        <div class="set-group">
+            <div class="set-row"><span>安全盾保护</span><span style="color:#16a34a;">已开启</span></div>
+            <div class="set-row"><span>指纹支付</span><span>已开启</span></div>
+            <div class="set-row"><span>本位币</span><span>USD ($)</span></div>
+        </div>
+        <button style="background:#fee2e2; color:#ef4444;" onclick="logout()">退出登录</button>
+    </div>
+</div>
+
+<script>
+// 登录/退出
+function handleLogin() {
+    const u = document.getElementById('login-user').value;
+    const p = document.getElementById('login-pass').value;
+    if(u === 'admin' && p === '123456') {
+        document.getElementById('login-page').style.display = 'none';
+        showToast("欢迎回来");
+    } else {
+        showToast("账号密码错误");
+    }
+}
+function logout() {
+    // 唤起登录页
+    document.getElementById('login-page').style.display = 'flex';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+    closeModal('modal-settings');
+}
+
+function showToast(msg){ let t=document.getElementById("toast"); t.innerText=msg; t.style.display="block"; setTimeout(()=>t.style.display="none",1500); }
+function openMenu(){ document.getElementById("menu").style.left="0"; document.getElementById("menuOverlay").style.display="block"; }
+function closeMenu(){ document.getElementById("menu").style.left="-310px"; document.getElementById("menuOverlay").style.display="none"; }
+function openModal(id){ 
+    if(id==='analysis' && !document.getElementById('bars').children.length){
+        ['周一','周二','周三','周四','周五','周六','周日'].forEach(d=>{
+            document.getElementById('bars').innerHTML += `<div class="bar-row"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>${d}</span><span style="color:#16a34a">+${Math.floor(Math.random()*100)}B</span></div><div class="bar-bg"><div class="bar-fill" style="width:${Math.random()*100}%"></div></div></div>`;
+        });
+    }
+    document.getElementById('modal-'+id).classList.add('show'); 
+}
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function closeModalOutside(e,id){ if(e.target.id===id) closeModal(id); }
+
+function switchTab(el,tabId){
+    document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+tabId).classList.add('active');
+}
+
+function doAction(t){ 
+    let inputs = document.getElementById('modal-'+t).querySelectorAll('input');
+    for(let i of inputs){ 
+        if(!i.value.trim()){ 
+            showToast("请填写完整信息"); 
+            return; 
+        } 
+    }
+    showToast("操作成功"); 
+    closeModal('modal-'+t); 
+}
+
+const tokens=[
+    {icon:'₿',c:'#f7931a',name:'BTC',p:'$67,230.15',a:'1.2405',v:'$83,412.33'},
+    {icon:'⟠',c:'#627eea',name:'ETH',p:'$1,850.15',a:'999,999,999,999',v:'$1.85T'},
+    {icon:'◆',c:'#f3ba2f',name:'BNB',p:'$622.51',a:'12.0294',v:'$7,488.33'},
+    {icon:'S',c:'#14f195',name:'SOL',p:'$145.22',a:'45.00',v:'$6,534.90'},
+    {icon:'$',c:'#2775ca',name:'USDC',p:'$1.00',a:'5,000.00',v:'$5,000.00'},
+    {icon:'A',c:'#28a0f0',name:'ARB',p:'$1.15',a:'1,200.00',v:'$1,380.00'}
+];
+tokens.forEach(t=>{
+    document.getElementById('token-list').innerHTML += `<div class="token-item"><div class="circle" style="width:40px;height:40px;margin-bottom:0;background:${t.c};color:#fff;font-weight:bold;">${t.icon}</div><div class="left" style="flex:1;margin-left:12px;"><b>${t.name}</b><div style="font-size:12px;color:#888;">${t.p}</div></div><div style="text-align:right;"><b>${t.a}</b><div style="font-size:11px;color:#999;">${t.v}</div></div></div>`;
+});
+
+const txData=[
+    {n:"工资收入", type:"in", date:"2026/03/12"},
+    {n:"亚马逊购物", type:"out", date:"2026/03/11"},
+    {n:"Netflix 续费", type:"out", date:"2026/03/10"},
+    {n:"卖出 ETH", type:"in", date:"2026/03/09"},
+    {n:"Apple Store", type:"out", date:"2026/03/08"},
+    {n:"Uniswap 兑换", type:"out", date:"2026/03/08"},
+    {n:"外部转账", type:"in", date:"2026/03/07"},
+    {n:"Starbucks", type:"out", date:"2026/03/06"},
+    {n:"Steam 消费", type:"out", date:"2026/03/05"},
+    {n:"房租缴纳", type:"out", date:"2026/03/05"},
+    {n:"币安提现", type:"in", date:"2026/03/04"},
+    {n:"OpenSea 买入", type:"out", date:"2026/03/03"}
+];
+txData.forEach(tx=>{
+    const isOut = tx.type === "out";
+    document.getElementById('list').innerHTML += `<div class="item"><div class="left"><b>${tx.n}</b><small>${tx.date}</small><span class="tag ${isOut?'tag-out':'tag-in'}">${isOut?'支出':'收入'}</span></div><div style="text-align:right;"><div class="${isOut?'tx-out':'tx-in'}">${isOut?'-':'+'}$${Math.floor(Math.random()*1000 + 10)}</div><small style="color:#bbb;">USD</small></div></div>`;
+});
+</script>
+</body>
+</html>
