@@ -2,37 +2,23 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="apple-touch-icon" href="icon.png">
 <style>
-/* 1. 基础重置：回归正常文档流，移除之前加的各种防穿透护盾和多余的 padding */
-html, body {
-    margin: 0; padding: 0; height: 100%; background: #f4f6f8; 
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC";
-    max-width: 430px; margin: 0 auto; overflow-x: hidden;
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: none;
-}
-
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC";background:#f4f6f8;max-width:430px;margin:0 auto;overflow-x:hidden;}
 button,.circle,.menuItem,.item,.card,.token-item{transition:0.15s;cursor:pointer;}
 button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-item:active{transform:scale(0.95);opacity:0.85;}
 
-/* 登录页面 */
+/* 登录页面样式 - 默认设为 none (不再烦人) */
 #login-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:20000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;box-sizing:border-box;}
 .login-logo{font-size:48px;margin-bottom:10px;}
 .login-box{width:100%;text-align:center;}
 
 /* Toast */
-.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:12px 24px;border-radius:12px;display:none;z-index:20001;}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:12px 24px;border-radius:12px;display:none;z-index:10000;}
 
-/* 2. 顶部头像和杠：恢复正常排版，不再固定，往下滑会自然消失。仅保留安全区高度的 padding */
-.top{
-    display:flex;justify-content:space-between;padding:15px;align-items:center;
-    padding-top: calc(env(safe-area-inset-top) + 15px);
-    background:transparent; 
-}
+/* 顶部 */
+.top{display:flex;justify-content:space-between;padding:15px;align-items:center;}
 .menuBtn{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
 .avatar{width:38px;height:38px;border-radius:50%;background:url('https://api.dicebear.com/7.x/bottts/svg?seed=Tesla') #fff;background-size:cover;border:1px solid #ddd;}
 
@@ -43,10 +29,10 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 .actions{display:flex;justify-content:space-around;margin:20px;}
 .circle{width:60px;height:60px;border-radius:20px;background:#e6f7ec;color:#16a34a;display:flex;align-items:center;justify-content:center;margin-bottom:5px;}
 
-/* 银行卡 */
+/* 银行卡细节 */
 .cards{display:flex;overflow-x:auto;padding-left:15px;padding-right:30px;gap:15px;scrollbar-width:none;}
 .cards::-webkit-scrollbar{display:none;}
-.card{min-width:280px;height:170px;border-radius:20px;padding:20px;color:white;position:relative;overflow:hidden;box-shadow:0 10px 20px rgba(0,0,0,0.1);flex-shrink:0;}
+.card{min-width:280px;height:170px;border-radius:20px;padding:20px;color:white;position:relative;overflow:hidden;box-shadow:0 10px 20px rgba(0,0,0,0.1);}
 .chip{width:35px;height:25px;background:linear-gradient(135deg,#ffd700,#b8860b);border-radius:4px;margin-bottom:10px;}
 .co-tag{position:absolute;top:20px;right:20px;font-weight:bold;font-style:italic;font-size:16px;opacity:0.8;}
 .card1{background:linear-gradient(135deg,#4f46e5,#9333ea);}
@@ -57,32 +43,18 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 .card .num{position:absolute;bottom:50px;font-weight:bold;font-size:18px;letter-spacing:2px;}
 .card .name{position:absolute;bottom:20px;font-size:12px;}
 
-/* 列表 */
+/* 列表条目 */
 .item,.token-item,.market-item{background:#fff;margin:10px 15px;padding:15px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;border:1px solid #eee;box-shadow:0 3px 10px rgba(0,0,0,0.05);}
 .left{display:flex;flex-direction:column;}
 .tag{font-size:11px;padding:2px 6px;border-radius:6px;width:fit-content;margin-top:4px;}
 
-/* 3. 侧边菜单：保持完美白色顶到头，没有灰条 */
-#menu{
-    position:fixed;top:0;left:-310px;width:260px;height:100%;
-    background:#fff;box-shadow:5px 0 20px rgba(0,0,0,0.1);transition:0.3s;z-index:9998;
-    padding: calc(env(safe-area-inset-top) + 20px) 20px 20px; 
-    box-sizing: border-box;
-}
-#menuOverlay{position:fixed;top:0;left:0;width:100%;height:100vh;background:rgba(0,0,0,0.4);display:none;z-index:9997;}
+/* 侧边菜单 */
+#menu{position:fixed;top:0;left:-310px;width:260px;height:100%;background:#fff;box-shadow:5px 0 20px rgba(0,0,0,0.1);transition:0.3s;z-index:9998;padding:20px;}
+#menuOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:none;z-index:9997;}
 .menuItem{background:#f3f4f6;padding:14px;border-radius:12px;margin:10px 0;display:flex;align-items:center;gap:10px;}
 
-/* 4. Tabs 吸顶：往下滑时，它会停在灵动岛（安全区）的正下方。
-并且加了一点毛玻璃效果，让透过去的元素更有质感！ */
-.tabs-row{
-    display:flex;padding:0 15px;
-    background: rgba(244, 246, 248, 0.95); 
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    border-bottom:1px solid #eee;margin-top:10px;
-    position:sticky;
-    top: env(safe-area-inset-top); /* 核心：吸顶在安全区正下方，上方全透明让列表透过去 */
-    z-index:999;
-}
+/* Tabs */
+.tabs-row{display:flex;padding:0 15px;background:#fff;border-bottom:1px solid #eee;margin-top:10px;position:sticky;top:0;z-index:10;}
 .tab-item{padding:14px 12px;font-size:14px;color:#999;position:relative;}
 .tab-item.active{color:#16a34a;font-weight:600;}
 .tab-item.active::after{content:'';position:absolute;bottom:0;left:10px;right:10px;height:3px;background:#16a34a;border-radius:2px;}
@@ -90,27 +62,29 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 .tab-content.active{display:block;}
 
 /* Modal */
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:11000;justify-content:center;align-items:flex-end;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:9999;justify-content:center;align-items:flex-end;}
 .modal.show{display:flex;}
-.modal-box{background:#fff;width:100%;max-width:430px;border-radius:25px 25px 0 0;padding:20px;padding-bottom:calc(env(safe-area-inset-bottom) + 20px);animation:slideUp 0.3s cubic-bezier(0,0,0.2,1);box-sizing:border-box;}
+.modal-box{background:#fff;width:100%;max-width:430px;border-radius:25px 25px 0 0;padding:20px;animation:slideUp 0.3s cubic-bezier(0,0,0.2,1);box-sizing:border-box;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-title{font-size:18px;font-weight:bold;margin-bottom:15px;}
 .modal-back{color:#3b82f6;cursor:pointer;margin-bottom:10px;display:inline-block;}
 input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12px;border:1px solid #eee;background:#f8fafc;box-sizing:border-box;}
 .modal-box button, .login-box button{width:100%;background:#16a34a;color:#fff;border:none;border-radius:15px;padding:15px;font-weight:600;}
 
-/* 分析图表 */
+/* 资产分析专有 */
 .bar-row{margin-bottom:12px;}
 .bar-bg{background:#f0f0f0;border-radius:6px;height:8px;overflow:hidden;}
 .bar-fill{height:8px;border-radius:6px;background:#16a34a;}
 .stat-card{background:#f8fdf8;border-radius:14px;padding:12px;border:1px solid #e6f7ec;}
 
-/* 状态色 */
+/* 收支标记 */
 .tx-in{color:#16a34a !important; font-weight:bold;}
 .tx-out{color:#ef4444 !important; font-weight:bold;}
 .tag-in{background:#dcfce7; color:#16a34a;}
 .tag-out{background:#fee2e2; color:#ef4444;}
 .m-up{color:#16a34a;} .m-down{color:#ef4444;}
+
+/* 设置组 */
 .set-group{background:#f8fafc; border-radius:15px; padding:5px 15px; margin-bottom:15px;}
 .set-row{display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #eee;}
 </style>
@@ -123,7 +97,7 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
     <div class="login-box">
         <input type="text" placeholder="账号" id="login-user">
         <input type="password" placeholder="密码" id="login-pass">
-        <button onclick="handleLogin()">立即登录</button>
+        <button onclick="handleLogin()">登录进入</button>
     </div>
 </div>
 
@@ -183,7 +157,7 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
 </div>
 
 <div class="modal" id="modal-receive" onclick="closeModalOutside(event,'modal-receive')">
-    <div class="modal-box"><span class="modal-back" onclick="closeModal('modal-receive')">← 返回</span><div class="modal-title">我的收款地址</div><div style="background:#f4f6f8;padding:20px;border-radius:15px;text-align:center;word-break:break-all;font-size:12px;">0x7a3F8B2eD91C4f5E6A7B8C9D</div><button style="margin-top:15px;" onclick="copyAddr()">点击复制</button></div>
+    <div class="modal-box"><span class="modal-back" onclick="closeModal('modal-receive')">← 返回</span><div class="modal-title">我的收款地址</div><div style="background:#f4f6f8;padding:20px;border-radius:15px;text-align:center;word-break:break-all;font-size:12px;">0x7a3F8B2eD91C4f5E6A7B8C9D</div><button style="margin-top:15px;" onclick="showToast('已复制');closeModal('modal-receive')">点击复制</button></div>
 </div>
 
 <div class="modal" id="modal-swap" onclick="closeModalOutside(event,'modal-swap')">
@@ -199,6 +173,10 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
             <div style="font-size:12px;"><div><span style="color:#627eea">●</span> ETH: 71%</div><div style="margin-top:5px;"><span style="color:#f3ba2f">●</span> Others: 29%</div></div>
         </div>
         <div id="bars"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
+            <div class="stat-card"><div style="font-size:11px;color:#888;">今日盈亏</div><div style="color:#16a34a;font-weight:bold;">+$102.9B</div></div>
+            <div class="stat-card"><div style="font-size:11px;color:#888;">收益率</div><div style="color:#16a34a;font-weight:bold;">+5.21%</div></div>
+        </div>
     </div>
 </div>
 
@@ -217,21 +195,39 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
     <div class="modal-box">
         <span class="modal-back" onclick="closeModal('modal-settings')">← 关闭</span>
         <div class="modal-title">⚙️ 设置中心</div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; background:#f3f4f6; padding:15px; border-radius:15px;">
+            <div class="avatar" style="width:45px; height:45px;"></div>
+            <div><div style="font-weight:bold;">Anan_Web3</div><div style="font-size:11px; color:#888;">UID: 887219304</div></div>
+        </div>
         <div class="set-group">
             <div class="set-row"><span>安全盾保护</span><span style="color:#16a34a;">已开启</span></div>
             <div class="set-row"><span>指纹支付</span><span>已开启</span></div>
+            <div class="set-row"><span>本位币</span><span>USD ($)</span></div>
         </div>
         <button style="background:#fee2e2; color:#ef4444;" onclick="logout()">退出登录</button>
     </div>
 </div>
 
 <script>
-function handleLogin(){
-    const u=document.getElementById('login-user').value, p=document.getElementById('login-pass').value;
-    if(u==='admin' && p==='123456'){ document.getElementById('login-page').style.display='none'; showToast("欢迎回来"); }
-    else showToast("账号密码错误");
+// 登录/退出
+function handleLogin() {
+    const u = document.getElementById('login-user').value;
+    const p = document.getElementById('login-pass').value;
+    if(u === 'admin' && p === '123456') {
+        document.getElementById('login-page').style.display = 'none';
+        showToast("欢迎回来");
+    } else {
+        showToast("账号密码错误");
+    }
 }
-function logout(){ document.getElementById('login-page').style.display='flex'; closeModal('modal-settings'); }
+function logout() {
+    // 唤起登录页
+    document.getElementById('login-page').style.display = 'flex';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+    closeModal('modal-settings');
+}
+
 function showToast(msg){ let t=document.getElementById("toast"); t.innerText=msg; t.style.display="block"; setTimeout(()=>t.style.display="none",1500); }
 function openMenu(){ document.getElementById("menu").style.left="0"; document.getElementById("menuOverlay").style.display="block"; }
 function closeMenu(){ document.getElementById("menu").style.left="-310px"; document.getElementById("menuOverlay").style.display="none"; }
@@ -245,18 +241,25 @@ function openModal(id){
 }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 function closeModalOutside(e,id){ if(e.target.id===id) closeModal(id); }
+
 function switchTab(el,tabId){
     document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
     el.classList.add('active');
     document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
     document.getElementById('tab-'+tabId).classList.add('active');
 }
+
 function doAction(t){ 
     let inputs = document.getElementById('modal-'+t).querySelectorAll('input');
-    for(let i of inputs){ if(!i.value.trim()){ showToast("请填写完整信息"); return; } }
-    showToast("操作成功"); closeModal('modal-'+t); 
+    for(let i of inputs){ 
+        if(!i.value.trim()){ 
+            showToast("请填写完整信息"); 
+            return; 
+        } 
+    }
+    showToast("操作成功"); 
+    closeModal('modal-'+t); 
 }
-function copyAddr(){ navigator.clipboard.writeText("0x7a3F8B2eD91C4f5E6A7B8C9D"); showToast("地址已复制"); }
 
 const tokens=[
     {icon:'₿',c:'#f7931a',name:'BTC',p:'$67,230.15',a:'1.2405',v:'$83,412.33'},
@@ -271,15 +274,21 @@ tokens.forEach(t=>{
 });
 
 const txData=[
-    {n:"工资收入", type:"in", date:"2026/03/12"},{n:"亚马逊购物", type:"out", date:"2026/03/11"},
-    {n:"Netflix 续费", type:"out", date:"2026/03/10"},{n:"卖出 ETH", type:"in", date:"2026/03/09"},
-    {n:"Apple Store", type:"out", date:"2026/03/08"},{n:"Uniswap 兑换", type:"out", date:"2026/03/08"},
-    {n:"外部转账", type:"in", date:"2026/03/07"},{n:"Starbucks", type:"out", date:"2026/03/06"},
-    {n:"Steam 消费", type:"out", date:"2026/03/05"},{n:"房租缴纳", type:"out", date:"2026/03/05"},
-    {n:"币安提现", type:"in", date:"2026/03/04"},{n:"OpenSea 买入", type:"out", date:"2026/03/03"}
+    {n:"工资收入", type:"in", date:"2026/03/12"},
+    {n:"亚马逊购物", type:"out", date:"2026/03/11"},
+    {n:"Netflix 续费", type:"out", date:"2026/03/10"},
+    {n:"卖出 ETH", type:"in", date:"2026/03/09"},
+    {n:"Apple Store", type:"out", date:"2026/03/08"},
+    {n:"Uniswap 兑换", type:"out", date:"2026/03/08"},
+    {n:"外部转账", type:"in", date:"2026/03/07"},
+    {n:"Starbucks", type:"out", date:"2026/03/06"},
+    {n:"Steam 消费", type:"out", date:"2026/03/05"},
+    {n:"房租缴纳", type:"out", date:"2026/03/05"},
+    {n:"币安提现", type:"in", date:"2026/03/04"},
+    {n:"OpenSea 买入", type:"out", date:"2026/03/03"}
 ];
 txData.forEach(tx=>{
-    const isOut=tx.type==="out";
+    const isOut = tx.type === "out";
     document.getElementById('list').innerHTML += `<div class="item"><div class="left"><b>${tx.n}</b><small>${tx.date}</small><span class="tag ${isOut?'tag-out':'tag-in'}">${isOut?'支出':'收入'}</span></div><div style="text-align:right;"><div class="${isOut?'tx-out':'tx-in'}">${isOut?'-':'+'}$${Math.floor(Math.random()*1000 + 10)}</div><small style="color:#bbb;">USD</small></div></div>`;
 });
 </script>
