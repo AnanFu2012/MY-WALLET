@@ -2,20 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="icon.png">
 <style>
-/* 核心修复：防止滑动时顶部露底 */
+/* 1. 基础重置：回归正常文档流，移除之前加的各种防穿透护盾和多余的 padding */
 html, body {
     margin: 0; padding: 0; height: 100%; background: #f4f6f8; 
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC";
     max-width: 430px; margin: 0 auto; overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
 }
-
-/* 2. 删除了 body::before 护盾，改为完全透明 */
 
 button,.circle,.menuItem,.item,.card,.token-item{transition:0.15s;cursor:pointer;}
 button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-item:active{transform:scale(0.95);opacity:0.85;}
@@ -28,11 +27,11 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 /* Toast */
 .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:12px 24px;border-radius:12px;display:none;z-index:20001;}
 
-/* 顶部导航：保持透明背景 */
+/* 2. 顶部头像和杠：恢复正常排版，不再固定，往下滑会自然消失。仅保留安全区高度的 padding */
 .top{
     display:flex;justify-content:space-between;padding:15px;align-items:center;
-    position:sticky; top:0; background:transparent; z-index:999;
     padding-top: calc(env(safe-area-inset-top) + 15px);
+    background:transparent; 
 }
 .menuBtn{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
 .avatar{width:38px;height:38px;border-radius:50%;background:url('https://api.dicebear.com/7.x/bottts/svg?seed=Tesla') #fff;background-size:cover;border:1px solid #ddd;}
@@ -47,7 +46,7 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 /* 银行卡 */
 .cards{display:flex;overflow-x:auto;padding-left:15px;padding-right:30px;gap:15px;scrollbar-width:none;}
 .cards::-webkit-scrollbar{display:none;}
-.card{min-width:280px;height:170px;border-radius:20px;padding:20px;color:white;position:relative;overflow:hidden;box-shadow:0 10px 20px rgba(0,0,0,0.1);}
+.card{min-width:280px;height:170px;border-radius:20px;padding:20px;color:white;position:relative;overflow:hidden;box-shadow:0 10px 20px rgba(0,0,0,0.1);flex-shrink:0;}
 .chip{width:35px;height:25px;background:linear-gradient(135deg,#ffd700,#b8860b);border-radius:4px;margin-bottom:10px;}
 .co-tag{position:absolute;top:20px;right:20px;font-weight:bold;font-style:italic;font-size:16px;opacity:0.8;}
 .card1{background:linear-gradient(135deg,#4f46e5,#9333ea);}
@@ -63,19 +62,27 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 .left{display:flex;flex-direction:column;}
 .tag{font-size:11px;padding:2px 6px;border-radius:6px;width:fit-content;margin-top:4px;}
 
-/* 3. 侧边菜单：背景直接顶到头，通过 padding 避让内容 */
+/* 3. 侧边菜单：保持完美白色顶到头，没有灰条 */
 #menu{
     position:fixed;top:0;left:-310px;width:260px;height:100%;
-    background:#fff;box-shadow:5px 0 20px rgba(0,0,0,0.1);
-    transition:0.3s;z-index:9998;
-    padding: calc(env(safe-area-inset-top) + 20px) 20px 20px;
+    background:#fff;box-shadow:5px 0 20px rgba(0,0,0,0.1);transition:0.3s;z-index:9998;
+    padding: calc(env(safe-area-inset-top) + 20px) 20px 20px; 
     box-sizing: border-box;
 }
 #menuOverlay{position:fixed;top:0;left:0;width:100%;height:100vh;background:rgba(0,0,0,0.4);display:none;z-index:9997;}
 .menuItem{background:#f3f4f6;padding:14px;border-radius:12px;margin:10px 0;display:flex;align-items:center;gap:10px;}
 
-/* Tabs */
-.tabs-row{display:flex;padding:0 15px;background:#fff;border-bottom:1px solid #eee;margin-top:10px;position:sticky;top:calc(env(safe-area-inset-top) + 68px);z-index:10;}
+/* 4. Tabs 吸顶：往下滑时，它会停在灵动岛（安全区）的正下方。
+并且加了一点毛玻璃效果，让透过去的元素更有质感！ */
+.tabs-row{
+    display:flex;padding:0 15px;
+    background: rgba(244, 246, 248, 0.95); 
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-bottom:1px solid #eee;margin-top:10px;
+    position:sticky;
+    top: env(safe-area-inset-top); /* 核心：吸顶在安全区正下方，上方全透明让列表透过去 */
+    z-index:999;
+}
 .tab-item{padding:14px 12px;font-size:14px;color:#999;position:relative;}
 .tab-item.active{color:#16a34a;font-weight:600;}
 .tab-item.active::after{content:'';position:absolute;bottom:0;left:10px;right:10px;height:3px;background:#16a34a;border-radius:2px;}
@@ -219,7 +226,6 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
 </div>
 
 <script>
-// 脚本部分完全保持原样，无任何修改
 function handleLogin(){
     const u=document.getElementById('login-user').value, p=document.getElementById('login-pass').value;
     if(u==='admin' && p==='123456'){ document.getElementById('login-page').style.display='none'; showToast("欢迎回来"); }
