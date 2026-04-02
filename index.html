@@ -67,8 +67,8 @@ button:active,.circle:active,.menuItem:active,.item:active,.card:active,.token-i
 .left{display:flex;flex-direction:column;}
 .tag{font-size:11px;padding:2px 6px;border-radius:6px;width:fit-content;margin-top:4px;}
 
-/* 侧边菜单 */
-#menu{position:fixed;top:0;left:-310px;width:260px;height:100vh;background:#fff;box-shadow:5px 0 20px rgba(0,0,0,0.1);transition:0.3s;z-index:9998;padding:20px;padding-top:calc(env(safe-area-inset-top) + 20px);}
+/* 侧边菜单 - 已添加顶部避让，去除露底白边 */
+#menu{position:fixed;top:0;left:-310px;width:260px;height:100vh;background:#fff;box-shadow:5px 0 20px rgba(0,0,0,0.1);transition:0.3s;z-index:9998;padding:20px;padding-top:calc(env(safe-area-inset-top) + 20px);box-sizing:border-box;}
 #menuOverlay{position:fixed;top:0;left:0;width:100%;height:100vh;background:rgba(0,0,0,0.4);display:none;z-index:9997;}
 .menuItem{background:#f3f4f6;padding:14px;border-radius:12px;margin:10px 0;display:flex;align-items:center;gap:10px;}
 
