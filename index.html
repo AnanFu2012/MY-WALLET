@@ -201,6 +201,7 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
     <div class="menuItem" onclick="openModal('market');closeMenu()">📈 市场行情</div>
     <div class="menuItem" onclick="openModal('send');closeMenu()">↗ 转账</div>
     <div class="menuItem" onclick="openModal('addcard');closeMenu()">💳 添加卡片</div>
+    <div class="menuItem" onclick="openModal('link');closeMenu()">🔗 绑定账户 (Link)</div>
     <div class="menuItem" onclick="showToast('活动中心');closeMenu()">🎉 活动</div>
     <div class="menuItem" onclick="showToast('联系客服');closeMenu()">💬 客服</div>
     <div class="menuItem" onclick="openModal('settings');closeMenu()" style="border-top:1px solid #eee;margin-top:10px;padding-top:20px;color:#16a34a; font-weight:bold;">⚙️ 设置中心</div>
@@ -245,6 +246,17 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
 <div class="tab-content active" id="tab-tx"><div id="list"></div></div>
 <div class="tab-content" id="tab-nft" style="padding:50px;text-align:center;color:#999;">🖼️<br>暂无 NFT 资产</div>
 
+<div class="modal" id="modal-link" onclick="closeModalOutside(event,'modal-link')">
+    <div class="modal-box">
+        <span class="modal-back" onclick="closeModal('modal-link')">← 返回</span>
+        <div class="modal-title">🔗 绑定外部账户</div>
+        <div class="menuItem" onclick="mockLinkAccount('银行账户 (Bank Account)')">🏦 绑定银行账户</div>
+        <div class="menuItem" onclick="mockLinkAccount('PayPal')">🅿️ 绑定 PayPal</div>
+        <div class="menuItem" onclick="mockLinkAccount('Apple Pay')"> 绑定 Apple Pay</div>
+        <div class="menuItem" onclick="mockLinkAccount('Google Pay')">🇬 绑定 Google Pay</div>
+    </div>
+</div>
+
 <div class="modal" id="modal-addcard" onclick="closeModalOutside(event,'modal-addcard')">
     <div class="modal-box">
         <span class="modal-back" onclick="closeModal('modal-addcard')">← 返回</span>
@@ -261,7 +273,16 @@ input{display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12p
 </div>
 
 <div class="modal" id="modal-send" onclick="closeModalOutside(event,'modal-send')">
-    <div class="modal-box"><span class="modal-back" onclick="closeModal('modal-send')">← 返回</span><div class="modal-title">发送资产</div><input placeholder="地址 0x..."><input placeholder="数量" type="number"><button onclick="doAction('send')">确认发送</button></div>
+    <div class="modal-box">
+        <span class="modal-back" onclick="closeModal('modal-send')">← 返回</span>
+        <div class="modal-title">发送资产</div>
+        <input placeholder="地址 0x...">
+        <input placeholder="数量" type="number">
+        <select id="send-card-select" style="display:block;width:100%;margin-bottom:10px;padding:14px;border-radius:12px;border:1px solid #eee;background:#f8fafc;box-sizing:border-box;font-size:16px;outline:none;">
+            <option value="">选择支付卡片</option>
+        </select>
+        <button onclick="doAction('send')">确认发送</button>
+    </div>
 </div>
 
 <div class="modal" id="modal-receive" onclick="closeModalOutside(event,'modal-receive')">
@@ -357,25 +378,16 @@ function switchTab(el,tabId){
     document.getElementById('tab-'+tabId).classList.add('active');
 }
 
-function doAction(t){ 
-    let inputs = document.getElementById('modal-'+t).querySelectorAll('input');
-    for(let i of inputs){ 
-        if(!i.value.trim()){ 
-            showToast("请填写完整信息"); 
-            return; 
-        } 
-    }
-    showToast("操作成功"); 
-    closeModal('modal-'+t); 
-}
+// 原始占位函数，后续被覆盖
+function doAction(t){ }
 
 const tokens=[
-    {icon:'₿',c:'#f7931a',name:'BTC',p:'$67,230.15',a:'1.2405',v:'$83,412.33'},
-    {icon:'⟠',c:'#627eea',name:'ETH',p:'$1,850.15',a:'999,999,999,999',v:'$1.85T'},
-    {icon:'◆',c:'#f3ba2f',name:'BNB',p:'$622.51',a:'12.0294',v:'$7,488.33'},
-    {icon:'S',c:'#14f195',name:'SOL',p:'$145.22',a:'45.00',v:'$6,534.90'},
-    {icon:'$',c:'#2775ca',name:'USDC',p:'$1.00',a:'5,000.00',v:'$5,000.00'},
-    {icon:'A',c:'#28a0f0',name:'ARB',p:'$1.15',a:'1,200.00',v:'$1,380.00'}
+    {icon:'₿',c:'#f7931a',name:'BTC',p:'$67,230',a:'1.2405',v:'$83,412'},
+    {icon:'⟠',c:'#627eea',name:'ETH',p:'$1,850',a:'999,999,999,999',v:'$1.85T'},
+    {icon:'◆',c:'#f3ba2f',name:'BNB',p:'$622',a:'12.0294',v:'$7,488'},
+    {icon:'S',c:'#14f195',name:'SOL',p:'$145',a:'45',v:'$6,534'},
+    {icon:'$',c:'#2775ca',name:'USDC',p:'$1',a:'5,000',v:'$5,000'},
+    {icon:'A',c:'#28a0f0',name:'ARB',p:'$1',a:'1,200',v:'$1,380'}
 ];
 tokens.forEach(t=>{
     document.getElementById('token-list').innerHTML += `<div class="token-item"><div class="circle" style="width:40px;height:40px;margin-bottom:0;background:${t.c};color:#fff;font-weight:bold;">${t.icon}</div><div class="left" style="flex:1;margin-left:12px;"><b>${t.name}</b><div style="font-size:12px;color:#888;">${t.p}</div></div><div style="text-align:right;"><b>${t.a}</b><div style="font-size:11px;color:#999;">${t.v}</div></div></div>`;
@@ -400,182 +412,12 @@ txData.forEach(tx=>{
     document.getElementById('list').innerHTML += `<div class="item"><div class="left"><b>${tx.n}</b><small>${tx.date}</small><span class="tag ${isOut?'tag-out':'tag-in'}">${isOut?'支出':'收入'}</span></div><div style="text-align:right;"><div class="${isOut?'tx-out':'tx-in'}">${isOut?'-':'+'}$${Math.floor(Math.random()*1000 + 10)}</div><small style="color:#bbb;">USD</small></div></div>`;
 });
 
-/* ========== 以下为严格追加的 JS 逻辑，用于注入卡片反面及事件 ========== */
+/* ========== 严格追加的卡片反面构造与事件 ========== */
 document.querySelectorAll('.card').forEach(card => {
-    // 绑定 180 度翻转点击事件
     card.addEventListener('click', function() {
         this.classList.toggle('flipped');
     });
     
-    // 动态生成并注入反面 DOM
-    const back = document.createElement('div');
-    back.className = 'card-back-added';
-    const cvv = Math.floor(100 + Math.random() * 899); // 随机 3 位安全码
-    back.innerHTML = `
-        <div class="mag-stripe"></div>
-        <div class="sig-row">Authorized Signature <span>${cvv}</span></div>
-        <div class="disclaimer">This card is issued by Wallet Pro Bank. If found, please return to any branch.</div>
-    `;
-    card.appendChild(back);
-});
-
-</script>
-
-<script>
-(function() {
-    // 设置延时确保原有代码已经执行覆盖，我们在此之上进行最终拦截和修正
-    setTimeout(() => {
-        
-        // 1. 闪兑输入联动 (ETH 自动算 USDT)
-        const swapModal = document.getElementById('modal-swap');
-        if (swapModal) {
-            const inputs = swapModal.querySelectorAll('input');
-            const sellInput = inputs[0]; 
-            const buyInput = inputs[1];  
-
-            sellInput.addEventListener('input', function() {
-                const val = this.value.toLowerCase();
-                const num = parseFloat(val.match(/[\d\.]+/)) || 0;
-                if (num > 0) {
-                    buyInput.value = (num * 1850.15).toFixed(2) + " USDT";
-                } else {
-                    buyInput.value = "";
-                }
-            });
-        }
-
-        // 2. 覆盖 doAction，实现拦截余额、交易记录+0 以及增加总余额的逻辑
-        window.doAction = function(t) {
-            let inputs = document.getElementById('modal-'+t).querySelectorAll('input');
-            
-            // 空输入验证
-            for(let i of inputs) { 
-                if(!i.value.trim()) { 
-                    showToast("请填写完整信息"); 
-                    return; 
-                } 
-            }
-
-            // 获取当前总余额
-            let balDiv = document.querySelector('.balance');
-            let currentBal = 0;
-            let balTextNode = null;
-            if (balDiv) {
-                balDiv.childNodes.forEach(node => {
-                    if (node.nodeType === 3 && node.nodeValue.includes('$')) {
-                        currentBal = parseFloat(node.nodeValue.replace(/[$,\s]/g, ''));
-                        balTextNode = node;
-                    }
-                });
-            }
-
-            let txName = "";
-            let amount = 0;
-            let isSwap = false;
-
-            if (t === 'send') {
-                let addr = inputs[0].value.trim();
-                amount = parseFloat(inputs[1].value) || 0;
-                
-                // 【核心要求1】：余额不足时拦截操作
-                if (amount > currentBal) {
-                    showToast("余额不足");
-                    return; 
-                }
-                
-                txName = `send to ${addr} account`;
-                currentBal -= amount; 
-                
-            } else if (t === 'swap') {
-                isSwap = true;
-                txName = "New swap";
-                let usdtStr = inputs[1].value;
-                let usdtToAdd = parseFloat(usdtStr.match(/[\d\.]+/)) || 0;
-                
-                amount = 0; // 【核心要求2】：显示 +0
-                currentBal += usdtToAdd; // 【核心要求3】：余额加上兑换的USDT
-            }
-
-            // 更新顶部余额显示
-            if (balTextNode && (t === 'send' || t === 'swap')) {
-                balTextNode.nodeValue = "\n    $" + currentBal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + "\n";
-            }
-
-            // 写入交易记录列表
-            if (t === 'send' || t === 'swap') {
-                let list = document.getElementById('list');
-                let today = new Date();
-                let dateStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
-                
-                let displayAmountStr = isSwap ? "+0" : `-$${amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                let displayClass = isSwap ? "tx-in" : "tx-out";
-                let displayTagClass = isSwap ? "tag-in" : "tag-out";
-                let displayTagText = isSwap ? "兑换" : "支出";
-
-                let newTxHTML = `
-                    <div class="item" style="animation: slideUp 0.3s ease;">
-                        <div class="left">
-                            <b>${txName}</b>
-                            <small>${dateStr}</small>
-                            <span class="tag ${displayTagClass}">${displayTagText}</span>
-                        </div>
-                        <div style="text-align:right;">
-                            <div class="${displayClass}">${displayAmountStr}</div>
-                            <small style="color:#bbb;">USD</small>
-                        </div>
-                    </div>
-                `;
-                if (list) list.insertAdjacentHTML('afterbegin', newTxHTML);
-            }
-
-            // 清理输入框
-            for(let i of inputs){ i.value = ''; }
-
-            // 保留原本的成功提示与关闭弹窗逻辑
-            showToast("操作成功"); 
-            closeModal('modal-'+t); 
-        };
-    }, 100);
-})();
-
-// ⬇️ 严格追加的内容：手动添加新卡片功能逻辑 ⬇️
-function submitNewCard() {
-    const brand = document.getElementById('addcard-brand').value;
-    const num = document.getElementById('addcard-num').value.trim();
-    const name = document.getElementById('addcard-name').value.trim() || 'CUSTOM CARD';
-
-    if (!num || num.length < 2) {
-        showToast("请输入至少2位卡号尾数");
-        return;
-    }
-
-    const cardsContainer = document.querySelector('.cards');
-    const newCard = document.createElement('div');
-    
-    // 随机分配一个已有背景皮肤 (card1 到 card5)
-    const bgIndex = Math.floor(Math.random() * 5) + 1;
-    newCard.className = `card card${bgIndex}`;
-
-    // 匹配你所选择的发卡机构标志HTML
-    let brandHtml = '';
-    if (brand === 'visa') {
-        brandHtml = '<div class="logo-visa">VISA</div>';
-    } else if (brand === 'mc') {
-        brandHtml = '<div class="logo-mc"><div class="mc-left"></div><div class="mc-right"></div></div>';
-    } else if (brand === 'up') {
-        brandHtml = '<div class="logo-up"><div class="up-bg"><div class="up-c1"></div><div class="up-c2"></div><div class="up-c3"></div></div><div class="up-text"><div style="font-size:10px;font-weight:bold;font-style:italic;">UnionPay</div><div style="font-size:11px;font-weight:bold;margin-top:-2px;">银联</div></div></div>';
-    }
-
-    // 组装正面内容
-    newCard.innerHTML = `
-        <div class="chip"></div>
-        <div class="co-tag">Wallet Pro</div>
-        <div class="num">**** ${num}</div>
-        <div class="name">${name.toUpperCase()}</div>
-        ${brandHtml}
-    `;
-
-    // 组装反面内容（继承之前的安全码及签名栏逻辑）
     const back = document.createElement('div');
     back.className = 'card-back-added';
     const cvv = Math.floor(100 + Math.random() * 899);
@@ -584,31 +426,275 @@ function submitNewCard() {
         <div class="sig-row">Authorized Signature <span>${cvv}</span></div>
         <div class="disclaimer">This card is issued by Wallet Pro Bank. If found, please return to any branch.</div>
     `;
-    newCard.appendChild(back);
+    card.appendChild(back);
+});
+</script>
 
-    // 绑定 180 度翻转事件
-    newCard.addEventListener('click', function(e) {
-        e.stopPropagation();
-        this.classList.toggle('flipped');
+<script>
+(function() {
+    // 【1】初始精准余额分配 (总和 1.85T)，不带小数点
+    const exactBalances = [
+        1000000000000000, 
+        800000000000000,  
+        49000000000000,   
+        999999998000,     
+        150               
+    ];
+
+    document.querySelectorAll('.cards .card').forEach((c, i) => {
+        if (i < 5) {
+            c.dataset.balance = exactBalances[i];
+        } else if (!c.dataset.balance) {
+            c.dataset.balance = 50000;
+        }
     });
 
-    // 插入到卡片容器的最末尾
-    cardsContainer.appendChild(newCard);
-
-    // 自动平滑滚动到新卡片的位置，提升体验
-    setTimeout(() => {
-        cardsContainer.scrollTo({
-            left: cardsContainer.scrollWidth,
-            behavior: 'smooth'
+    // 【2】全局刷新函数 (无小数点展示)
+    window.updateGlobalBalance = function() {
+        let total = 0;
+        document.querySelectorAll('.cards .card').forEach(c => {
+            total += parseFloat(c.dataset.balance || 0);
         });
-    }, 100);
+        let balDiv = document.querySelector('.balance');
+        if(balDiv) {
+            balDiv.childNodes.forEach(node => {
+                if (node.nodeType === 3 && node.nodeValue.includes('$')) {
+                    node.nodeValue = "\n    $" + Math.floor(total).toLocaleString('en-US') + "\n";
+                }
+            });
+        }
+    };
 
-    // 清空表单、弹吐司并关闭弹窗
-    document.getElementById('addcard-num').value = '';
-    document.getElementById('addcard-name').value = '';
-    showToast("添加成功");
-    closeModal('modal-addcard');
-}
+    window.updateSendCardSelect = function() {
+        const select = document.getElementById('send-card-select');
+        if(!select) return;
+        select.innerHTML = '<option value="">选择支付卡片</option>';
+        document.querySelectorAll('.cards .card').forEach((c, idx) => {
+            const numEl = c.querySelector('.num');
+            if(numEl) {
+                const num = numEl.innerText.replace('**** ', '');
+                const nameEl = c.querySelector('.name');
+                const name = nameEl ? nameEl.innerText : ('Card ' + (idx+1));
+                select.innerHTML += `<option value="${idx}">尾号 ${num} (${name})</option>`;
+            }
+        });
+    };
+
+    window.updateGlobalBalance(); 
+    window.updateSendCardSelect();
+
+    // 【3】动态挂载与修复 "卡片资产汇总" 菜单UI
+    window.addEventListener('DOMContentLoaded', () => {
+        const menu = document.getElementById('menu');
+        if(menu) {
+            const linkItem = Array.from(menu.querySelectorAll('.menuItem')).find(el => el.innerText.includes('绑定账户'));
+            if(linkItem && !document.getElementById('modal-card-info-list')) {
+                // 已去除了原本诡异的蓝色边框
+                linkItem.insertAdjacentHTML('afterend', `<div class="menuItem" onclick="window.openCardInfoList();closeMenu()">🗂️ 卡片资产汇总</div>`);
+            }
+        }
+        
+        if(!document.getElementById('modal-card-info-list')) {
+            const modalHTML = `
+            <div class="modal" id="modal-card-info-list" onclick="closeModalOutside(event,'modal-card-info-list')">
+                <div class="modal-box" style="max-height:85vh;overflow-y:auto;background:#f1f5f9;">
+                    <span class="modal-back" onclick="closeModal('modal-card-info-list')">← 返回</span>
+                    <div class="modal-title">🗂️ 所有卡片信息</div>
+                    <div id="all-cards-info-container"></div>
+                </div>
+            </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+    });
+
+    window.openCardInfoList = function() {
+        const container = document.getElementById('all-cards-info-container');
+        container.innerHTML = ''; 
+        document.querySelectorAll('.cards .card').forEach((c, idx) => {
+            const numEl = c.querySelector('.num');
+            const nameEl = c.querySelector('.name');
+            const num = numEl ? numEl.innerText : '****';
+            const name = nameEl ? nameEl.innerText : ('Card ' + (idx+1));
+            let bal = Math.floor(parseFloat(c.dataset.balance || 0));
+            const points = Math.floor(bal * 0.01);
+            
+            const cardHTML = `
+                <div style="background:#fff; border-radius:16px; padding:18px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #e2e8f0; padding-bottom:12px; margin-bottom:12px;">
+                        <b style="color:#0f172a; font-size:16px; font-style:italic;">${name}</b>
+                        <span style="background:#f1f5f9; padding:4px 10px; border-radius:12px; font-size:12px; color:#475569; font-weight:bold;">${num}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span style="color:#64748b; font-size:13px;">独立余额</span>
+                        <b style="color:#16a34a; font-size:15px;">$${bal.toLocaleString('en-US')}</b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span style="color:#64748b; font-size:13px;">积分奖励</span>
+                        <b style="color:#f59e0b;">${points.toLocaleString('en-US')} pts</b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b; font-size:13px;">安全状态</span>
+                        <span style="color:#3b82f6; font-size:12px; background:#eff6ff; padding:2px 8px; border-radius:6px;">已受安全盾保护</span>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHTML);
+        });
+        openModal('card-info-list');
+    };
+
+    // 【4】闪兑联动 (ETH 算 USDT)
+    const swapModal = document.getElementById('modal-swap');
+    if (swapModal) {
+        const inputs = swapModal.querySelectorAll('input');
+        if(inputs.length >= 2) {
+            inputs[0].addEventListener('input', function() {
+                const val = this.value.toLowerCase();
+                const num = parseFloat(val.match(/[\d\.]+/)) || 0;
+                if (num > 0) {
+                    inputs[1].value = Math.floor(num * 1850.15) + " USDT";
+                } else {
+                    inputs[1].value = "";
+                }
+            });
+        }
+    }
+
+    // 【5】唯一且纯净的 doAction 拦截器 (修复闪退和扣减问题)
+    window.doAction = function(t) {
+        let inputs = document.getElementById('modal-'+t).querySelectorAll('input');
+        for(let i of inputs) { 
+            if(!i.value.trim()) { showToast("请填写完整信息"); return; } 
+        }
+
+        let amount = 0;
+        let usdtToAdd = 0;
+
+        // 交易核心计算 (在清空之前完成拦截)
+        if (t === 'send') {
+            const select = document.getElementById('send-card-select');
+            if (select && select.value === "") { showToast("请选择支付卡片"); return; }
+            amount = parseFloat(inputs[1].value) || 0;
+            
+            const cards = document.querySelectorAll('.cards .card');
+            const selectedCard = cards[select.value];
+            let cardBal = parseFloat(selectedCard.dataset.balance || 0);
+            
+            if (amount > cardBal) { showToast("该卡片独立余额不足！"); return; }
+            selectedCard.dataset.balance = cardBal - amount;
+
+        } else if (t === 'swap') {
+            let usdtStr = inputs[1].value;
+            usdtToAdd = parseFloat(usdtStr.match(/[\d\.]+/)) || 0;
+            
+            const firstCard = document.querySelector('.cards .card');
+            if(firstCard) {
+                let cardBal = parseFloat(firstCard.dataset.balance || 0);
+                firstCard.dataset.balance = cardBal + usdtToAdd;
+            }
+        }
+
+        // 清理 UI
+        for(let i of inputs){ i.value = ''; }
+        showToast("操作成功"); 
+        closeModal('modal-'+t); 
+        
+        // 刷新全局余额
+        window.updateGlobalBalance();
+
+        // 插入记录
+        if (t === 'send' || t === 'swap') {
+            let txName = t === 'send' ? `send to ${inputs[0].value.trim()} account` : "New swap";
+            let list = document.getElementById('list');
+            let today = new Date();
+            let dateStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
+            
+            let isSwap = (t === 'swap');
+            let displayAmountStr = isSwap ? "+0" : `-$${Math.floor(amount).toLocaleString('en-US')}`;
+            let displayClass = isSwap ? "tx-in" : "tx-out";
+            let displayTagClass = isSwap ? "tag-in" : "tag-out";
+            let displayTagText = isSwap ? "兑换" : "支出";
+
+            let newTxHTML = `
+                <div class="item" style="animation: slideUp 0.3s ease;">
+                    <div class="left">
+                        <b>${txName}</b>
+                        <small>${dateStr}</small>
+                        <span class="tag ${displayTagClass}">${displayTagText}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="${displayClass}">${displayAmountStr}</div>
+                        <small style="color:#bbb;">USD</small>
+                    </div>
+                </div>
+            `;
+            if (list) list.insertAdjacentHTML('afterbegin', newTxHTML);
+        }
+    };
+
+    // 【6】添加新卡逻辑
+    window.submitNewCard = function() {
+        const brand = document.getElementById('addcard-brand').value;
+        const num = document.getElementById('addcard-num').value.trim();
+        const name = document.getElementById('addcard-name').value.trim() || 'CUSTOM CARD';
+
+        if (!num || num.length < 2) { showToast("请输入至少2位卡号尾数"); return; }
+
+        const cardsContainer = document.querySelector('.cards');
+        const newCard = document.createElement('div');
+        const bgIndex = Math.floor(Math.random() * 5) + 1;
+        newCard.className = `card card${bgIndex}`;
+
+        let brandHtml = '';
+        if (brand === 'visa') { brandHtml = '<div class="logo-visa">VISA</div>'; } 
+        else if (brand === 'mc') { brandHtml = '<div class="logo-mc"><div class="mc-left"></div><div class="mc-right"></div></div>'; } 
+        else if (brand === 'up') { brandHtml = '<div class="logo-up"><div class="up-bg"><div class="up-c1"></div><div class="up-c2"></div><div class="up-c3"></div></div><div class="up-text"><div style="font-size:10px;font-weight:bold;font-style:italic;">UnionPay</div><div style="font-size:11px;font-weight:bold;margin-top:-2px;">银联</div></div></div>'; }
+
+        newCard.innerHTML = `
+            <div class="chip"></div>
+            <div class="co-tag">Wallet Pro</div>
+            <div class="num">**** ${num}</div>
+            <div class="name">${name.toUpperCase()}</div>
+            ${brandHtml}
+        `;
+
+        const back = document.createElement('div');
+        back.className = 'card-back-added';
+        const cvv = Math.floor(100 + Math.random() * 899);
+        back.innerHTML = `
+            <div class="mag-stripe"></div>
+            <div class="sig-row">Authorized Signature <span>${cvv}</span></div>
+            <div class="disclaimer">This card is issued by Wallet Pro Bank. If found, please return to any branch.</div>
+        `;
+        newCard.appendChild(back);
+
+        newCard.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.classList.toggle('flipped');
+        });
+
+        newCard.dataset.balance = Math.floor(Math.random() * 50000 + 10000);
+        
+        cardsContainer.appendChild(newCard);
+        setTimeout(() => { cardsContainer.scrollTo({ left: cardsContainer.scrollWidth, behavior: 'smooth' }); }, 100);
+
+        document.getElementById('addcard-num').value = '';
+        document.getElementById('addcard-name').value = '';
+        showToast("添加成功");
+        closeModal('modal-addcard');
+        
+        window.updateSendCardSelect();
+        window.updateGlobalBalance();
+    };
+
+    // 【7】外部账户 Mock
+    window.mockLinkAccount = function(name) {
+        showToast("正在发送验证码至 " + name + "...");
+        setTimeout(() => closeModal('modal-link'), 1500); 
+    };
+
+})();
 </script>
 </body>
 </html>
